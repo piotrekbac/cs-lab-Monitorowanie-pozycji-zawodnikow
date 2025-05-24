@@ -24,5 +24,16 @@
             //Ustawiamy znacznik czasu na aktualny czas
             Timestamp = DateTime.Now;
         }
+
+        //Deklarujemy metodę DistanceTo, która oblicza odległość do innej lokalizacji
+        public double DistanceTo(Location other)
+        {
+            //Przypisujemy różnicę między współrzędnymi X i Y do zmiennych dx i dy, a następnie obliczamy odległość
+            double dx = X - other.X;
+            double dy = Y - other.Y;
+
+            //Zwracamy pierwiastek z sumy kwadratów różnic współrzędnych
+            return Math.Sqrt(dx * dx + dy * dy);
+        }
     }
 }

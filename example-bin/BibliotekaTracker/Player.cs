@@ -17,8 +17,12 @@ namespace BibliotekaTracker
         //Deklarujemy właściwość CurrentLocation, czyli aktualną lokalizację naszego gracza
         public Location CurrentLocation { get; private set; }
 
+        //Deklarujemy stałe MaxX i MaxY, które określają maksymalne wartości współrzędnych X i Y
+        private const double MaxX = 1000;
+        private const double MaxY = 500;
+
         //Deklarujemy zdarzenie LocationChanged, które będzie wywoływane, gdy zmieni się lokalizacja gracza
-        public event EventHandler<Location> LocationChanged;
+        public event EventHandler<Location>? LocationChanged;
 
         //Teraz przechodzimy do realizacji konstruktora klasy Player, który przyjmuje dwa argumenty: id gracza i jego początkową lokalizację
         public Player(int id, Location initialLocation)
@@ -28,18 +32,25 @@ namespace BibliotekaTracker
             CurrentLocation = initialLocation;
         }
 
-        //Teraz przechodzimy do realizacji metody ChangeLocation, która zmienia lokalizację gracza o zadane wartości deltaX i deltaY
-        public void ChangeLocation(double deltaX, double deltaY)
+        //Teraz przechodzimy do realizacji metody ChangeLocation, która zmienia lokalizację gracza o zadane wartości dx i dy
+        public void ChangeLocation(double dx, double dy)
         {
-            //Obliczamy nowe współrzędne X i Y, upewniając się, że mieszczą się w określonym zakresie (0-500 dla X i 0-1000 dla Y)
-            double newX = Math.Max(0, Math.Min(CurrentLocation.X + deltaX, 500));
-            double newY = Math.Max(0, Math.Min(CurrentLocation.Y + deltaY, 1000));
+            //Obliczamy nową lokalizację, dodając przesunięcia dx i dy do aktualnych współrzędnych X i Y
+            double newX = Math.Clamp(CurrentLocation.X + dx, 0, MaxX);
+            double newY = Math.Clamp(CurrentLocation.Y + dy, 0, MaxY);
 
-            //Tworzymy nowy obiekt Location z nowymi współrzędnymi
-            CurrentLocation = new Location(newX, newY);
+            //Tworzymy nową instancję klasy Location z obliczonymi współrzędnymi
+            var newLocation = new Location(newX, newY);
 
-            //Wywołujemy zdarzenie LocationChanged, przekazując nową lokalizację
-            LocationChanged?.Invoke(this, CurrentLocation);
+            //Sprawdzamy, czy nowa lokalizacja jest różna od aktualnej lokalizacji
+            if (newLocation.DistanceTo(CurrentLocation) > 0.01)
+            {
+                //Jeśli tak, to aktualizujemy CurrentLocation i wywołujemy zdarzenie LocationChanged
+                CurrentLocation = newLocation;
+
+                // Wywołujemy zdarzenie LocationChanged, przekazując nową lokalizację
+                LocationChanged?.Invoke(this, newLocation);
+            }
         }
     }
 }

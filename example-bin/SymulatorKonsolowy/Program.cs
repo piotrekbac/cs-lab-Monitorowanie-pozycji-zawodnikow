@@ -50,18 +50,24 @@ class Program
 
                 //Wywołujemy metodę ChangeLocation gracza, aby zmienić jego lokalizację o wygenerowane przesunięcia
                 p.ChangeLocation(dx, dy);
+
+                //Wypisujemy komunikat informujący o nowej lokalizacji gracza
+                Console.WriteLine($"Gracz {p.Id} przesunął się do {p.CurrentLocation.X:F2}, {p.CurrentLocation.Y:F2}");
             }
 
-        //Po zakończeniu ruchów, wypisujemy końcową lokalizację gracza
+            //Po zakończeniu ruchów, wypisujemy końcową lokalizację gracza
         })).ToArray();
 
         //Czekamy na zakończenie wszystkich zadań, czyli ruchów graczy
         Task.WaitAll(tasks);
 
         //Po zakończeniu symulacji, wypisujemy końcową lokalizację każdego gracza
-        int maxPlayer = tracker.GetPlayerWithMaxDistance();
+        int maxPlayer = tracker.GetPlayerWithLongestDistance();
 
         //Wypisujemy komunikat informujący, który gracz pokonał największą odległość
         Console.WriteLine($"Zawodnik {maxPlayer} pokonał największą odległość.");
+
+        Console.WriteLine("Naciśnij dowolny klawisz, aby zakończyć... Pozdrawim PB");
+        Console.ReadKey();
     }
 }

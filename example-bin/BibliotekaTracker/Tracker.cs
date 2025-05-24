@@ -10,58 +10,76 @@ namespace BibliotekaTracker
 {
     public class Tracker
     {
-        //Deklarujemy słownik, który będzie przechowywał identyfikatory graczy i ich lokalizacje
-        private readonly Dictionary<int, List<Location>> _positions = new();
+        //Deklarujemy słownik, który będzie przechowywał historię lokalizacji graczy
+        private readonly Dictionary<int, List<Location>> _history = new();
 
-        //Deklarujemy metodę RegisterPlayer, która rejestruje gracza w systemie
+        //Deklarujemy metodę RegisterPlayer, która rejestruje gracza w trackerze i inicjalizuje jego historię lokalizacji
         public void RegisterPlayer(Player player)
         {
-            //Tworzymy nową listę lokalizacji dla gracza i dodajemy jego aktualną lokalizację do słownika 
-            _positions[player.Id] = new List<Location> { player.CurrentLocation };
-
-            //Subskrybujemy zdarzenie LocationChanged, aby śledzić zmiany lokalizacji gracza
-            player.LocationChanged += OnLocationChanged;
-        }
-
-        //Deklarujemy teraz metode OnLocationChanged, która będzie wywoływana, gdy zmieni się lokalizacja gracza
-        private void OnLocationChanged(object sender, Location loc)
-        {
-            //Sprawdzamy, czy sender jest instancją klasy Player i czy jego identyfikator znajduje się w słowniku _positions
-            if (sender is Player p && _positions.ContainsKey(p.Id))
-                _positions[p.Id].Add(loc);
-        }
-
-        //Deklarujemy metodę GetPlayerWithMaxDistance, która zwraca identyfikator gracza, który przebył największą odległość
-        public int GetPlayerWithMaxDistance()
-        {
-            //Dla każdego gracza zwracamy jego identyfikator, a następnie sortujemy ich według przebytej odległości w porządku malejącym
-            return _positions
-                //Przechodzimy przez słownik, gdzie sortujemy według wartości, czyli przebytej odległości przez gracza
-                .OrderByDescending(p => CalculateTotalDistance(p.Value))
-
-                //Wybieramy pierwszego gracza z posortowanej listy - tego który przebył największą odległość
-                .First().Key;
-        }
-
-        //Deklarujemy metodę CalculateTotalDistance, która oblicza całkowitą odległość przebyta przez gracza
-        private double CalculateTotalDistance(List<Location> locations)
-        {
-            //Deklarujemy zmienną sum, która będzie przechowywała całkowitą odległość
-            double sum = 0;
-
-            //Sprawdzamy, czy lista lokalizacji ma więcej niż jeden element
-            for (int i = 1; i < locations.Count; i++)
+            //Sprawdzamy, czy gracz już jest zarejestrowany, jeśli tak, to nic nie robimy
+            //UWAGA: tu nadpisujemy historię, lepiej dodać warunek aby nie nadpisywać przypadkiem
+            if (!_history.ContainsKey(player.Id))
             {
-                //Obliczamy różnicę między współrzędnymi X i Y dla kolejnych lokalizacji i dodajemy do sumy
-                var dx = locations[i].X - locations[i - 1].X;
-                var dy = locations[i].Y - locations[i - 1].Y;
-
-                //Dodajemy do sumy pierwiastek z sumy kwadratów różnic współrzędnych
-                sum += Math.Sqrt(dx * dx + dy * dy);
+                _history[player.Id] = new List<Location> { player.CurrentLocation };
             }
 
-            //Zwracamy całkowitą odległość
-            return sum;
+            //Rejestrujemy zdarzenie LocationChanged, które będzie wywoływane, gdy zmieni się lokalizacja gracza
+            player.LocationChanged += OnLocationChange;
+        }
+
+        //Deklarujemy metodę OnLocationChange, która będzie wywoływana, gdy zmieni się lokalizacja gracza
+        private void OnLocationChange(object? sender, Location newLocation)
+        {
+            //Sprawdzamy, czy sender jest instancją klasy Player, jeśli tak, to dodajemy nową lokalizację do historii gracza
+            if (sender is Player player)
+            {
+                //Sprawdzamy, czy gracz jest zarejestrowany, jeśli nie, to nic nie robimy
+                if (_history.ContainsKey(player.Id))
+                {
+                    _history[player.Id].Add(newLocation);
+                }
+            }
+        }
+
+        //Deklarujemy metodę GetPlayerWithLongestDistance, która zwraca identyfikator gracza, który pokonał najdłuższą odległość
+        public int GetPlayerWithLongestDistance()
+        {
+            //Sprawdzamy, czy historia jest pusta, jeśli tak, to zwracamy -1 (brak gracza)
+            double maxDistance = 0;
+            int maxId = -1;
+
+            //Iterujemy przez historię lokalizacji każdego gracza
+            foreach (var typek in _history)
+            {
+                //Sprawdzamy, czy gracz ma co najmniej dwie lokalizacje, jeśli nie, to pomijamy go
+                var locations = typek.Value;
+
+                if (locations.Count < 2)
+                    continue;
+
+                //Definiujemy zmienną total, która będzie przechowywać całkowitą odległość pokonaną przez gracza
+                double total = 0;
+
+                //Iterujemy przez lokalizacje gracza, obliczając odległość między kolejnymi punktami
+                for (int i = 1; i < locations.Count; i++)
+                {
+                    //Dodajemy odległość między kolejnymi lokalizacjami do zmiennej total
+                    total += locations[i - 1].DistanceTo(locations[i]);
+                }
+
+                //Sprawdzamy, czy całkowita odległość jest większa niż maksymalna odległość, jeśli tak, to aktualizujemy maksymalną odległość i identyfikator gracza
+                if (total > maxDistance)
+                {
+                    //Aktualizujemy maksymalną odległość i identyfikator gracza
+                    maxDistance = total;
+
+                    //Aktualizujemy identyfikator gracza, który pokonał najdłuższą odległość
+                    maxId = typek.Key;
+                }
+            }
+
+            //Zwracamy identyfikator gracza, który pokonał najdłuższą odległość
+            return maxId;
         }
     }
 }

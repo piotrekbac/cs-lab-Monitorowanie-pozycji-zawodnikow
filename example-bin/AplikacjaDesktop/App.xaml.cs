@@ -2,6 +2,8 @@
 using System.Data;
 using System.Windows;
 
+//Piotr Bacior 15 722 - WSEI Kraków
+
 namespace AplikacjaDesktop
 {
     /// <summary>
