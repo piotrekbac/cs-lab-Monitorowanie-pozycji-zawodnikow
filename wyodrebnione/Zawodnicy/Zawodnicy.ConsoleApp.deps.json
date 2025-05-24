@@ -1,0 +1,36 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v5.0",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v5.0": {
+      "Zawodnicy.ConsoleApp/1.0.0": {
+        "dependencies": {
+          "Zawodnicy.Library": "1.0.0"
+        },
+        "runtime": {
+          "Zawodnicy.ConsoleApp.dll": {}
+        }
+      },
+      "Zawodnicy.Library/1.0.0": {
+        "runtime": {
+          "Zawodnicy.Library.dll": {}
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Zawodnicy.ConsoleApp/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Zawodnicy.Library/1.0.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}
